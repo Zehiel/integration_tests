@@ -33,6 +33,7 @@ public class UserRepositoryTest {
         repository.deleteAll();
         user = new User();
         user.setFirstName("Andrew");
+        user.setLastName("Borzecki");
         user.setEmail("andrew.borzecki@gmail.com");
         user.setAccountStatus(AccountStatus.NEW);
     }
@@ -65,4 +66,75 @@ public class UserRepositoryTest {
         Assert.assertThat(persistedUser.getId(), Matchers.notNullValue());
     }
 
+    @Test
+    public void shouldNotFindUser() throws Exception {
+
+        User persistedUser = entityManager.persist(user);
+        List<User> foundUsers = repository.findByFirstNameContainingOrLastNameContainingOrEmailContainingAllIgnoreCase("test","test","test@test.pl");
+        Assert.assertThat(foundUsers.isEmpty(), Matchers.is(true));
+    }
+
+    @Test
+    public void shouldFindOneUserByExactFirstName() throws Exception {
+        User persistedUser = entityManager.persist(user);
+        List<User> foundUsers = repository.findByFirstNameContainingOrLastNameContainingOrEmailContainingAllIgnoreCase("Andrew","#","#");
+        Assert.assertThat(foundUsers.get(0),Matchers.equalTo(persistedUser));
+    }
+
+    @Test
+    public void shouldFindOneUserBySimilarFirstName() throws Exception {
+        User persistedUser = entityManager.persist(user);
+        List<User> foundUsers = repository.findByFirstNameContainingOrLastNameContainingOrEmailContainingAllIgnoreCase("And","#","#");
+        Assert.assertThat(foundUsers.get(0),Matchers.equalTo(persistedUser));
+    }
+
+
+    @Test
+    public void shouldFindOneUserByLastName() throws Exception {
+        User persistedUser = entityManager.persist(user);
+        List<User> foundUsers = repository.findByFirstNameContainingOrLastNameContainingOrEmailContainingAllIgnoreCase("#","Borzecki","#");
+        Assert.assertThat(foundUsers.get(0),Matchers.equalTo(persistedUser));
+    }
+
+    @Test
+    public void shouldFindOneUserBySimilarLastName() throws Exception {
+        User persistedUser = entityManager.persist(user);
+        List<User> foundUsers = repository.findByFirstNameContainingOrLastNameContainingOrEmailContainingAllIgnoreCase("#","orz","#");
+        Assert.assertThat(foundUsers.get(0),Matchers.equalTo(persistedUser));
+    }
+
+    @Test
+    public void shouldFindOneUserByEmail() throws Exception {
+        User persistedUser = entityManager.persist(user);
+        List<User> foundUsers = repository.findByFirstNameContainingOrLastNameContainingOrEmailContainingAllIgnoreCase("#","#","andrew.borzecki@gmail.com");
+        Assert.assertThat(foundUsers.get(0),Matchers.equalTo(persistedUser));
+    }
+
+    @Test
+    public void shouldFindOneUserBySimilarEmail() throws Exception {
+        User persistedUser = entityManager.persist(user);
+        List<User> foundUsers = repository.findByFirstNameContainingOrLastNameContainingOrEmailContainingAllIgnoreCase("#","#","andrew.bor");
+        Assert.assertThat(foundUsers.get(0),Matchers.equalTo(persistedUser));
+    }
+
+    @Test
+    public void shouldFindOneUserByFirstAndLastNameCombination() throws Exception {
+        User persistedUser = entityManager.persist(user);
+        List<User> foundUsers = repository.findByFirstNameContainingOrLastNameContainingOrEmailContainingAllIgnoreCase("Andrew","Borzecki","#");
+        Assert.assertThat(foundUsers.get(0),Matchers.equalTo(persistedUser));
+    }
+
+    @Test
+    public void shouldFindOneUserByFirstNameAndEmailCombination() throws Exception {
+        User persistedUser = entityManager.persist(user);
+        List<User> foundUsers = repository.findByFirstNameContainingOrLastNameContainingOrEmailContainingAllIgnoreCase("Andrew","#","andrew.borzecki@gmail.com");
+        Assert.assertThat(foundUsers.get(0),Matchers.equalTo(persistedUser));
+    }
+
+    @Test
+    public void shouldFindOneUserByLastNameAndEmailCombination() throws Exception {
+        User persistedUser = entityManager.persist(user);
+        List<User> foundUsers = repository.findByFirstNameContainingOrLastNameContainingOrEmailContainingAllIgnoreCase("#","Borzecki","andrew.borzecki@gmail.com");
+        Assert.assertThat(foundUsers.get(0),Matchers.equalTo(persistedUser));
+    }
 }
