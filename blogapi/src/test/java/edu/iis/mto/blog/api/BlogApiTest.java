@@ -1,26 +1,28 @@
 package edu.iis.mto.blog.api;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.iis.mto.blog.api.request.UserRequest;
+import edu.iis.mto.blog.dto.Id;
+import edu.iis.mto.blog.services.BlogService;
+import edu.iis.mto.blog.services.DataFinder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import javax.persistence.EntityNotFoundException;
 
-import edu.iis.mto.blog.api.request.UserRequest;
-import edu.iis.mto.blog.dto.Id;
-import edu.iis.mto.blog.services.BlogService;
-import edu.iis.mto.blog.services.DataFinder;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(BlogApi.class)
@@ -31,6 +33,9 @@ public class BlogApiTest {
 
     @MockBean
     private BlogService blogService;
+
+    @MockBean
+    private BlogApi blogApi;
 
     @MockBean
     private DataFinder finder;
@@ -54,4 +59,27 @@ public class BlogApiTest {
         return new ObjectMapper().writer().writeValueAsString(obj);
     }
 
+    @Test
+    public void shouldReturnHttpStatus409IfDataIntegrityViolationExceptionOccurred() throws Exception {
+
+        UserRequest userRequest = new UserRequest();
+        userRequest.setFirstName("John");
+        userRequest.setLastName("Steward");
+        userRequest.setEmail("john@domain.com");
+        Mockito.when(blogService.createUser(userRequest)).thenThrow(new DataIntegrityViolationException("DataIntegrityViolation detected"));
+        String content = writeJson(userRequest);
+
+        mvc.perform(post("/blog/user").contentType(MediaType.APPLICATION_JSON_UTF8)
+                .accept(MediaType.APPLICATION_JSON_UTF8).content(content))
+                .andExpect(status().isConflict());
+
+    }
+
+    @Test
+    public void shouldReturnHttpStatus404IfRequestedNonExistingUser() throws Exception {
+
+        Mockito.when(blogApi.getUser(5L)).thenThrow(new EntityNotFoundException("User not found"));
+        mvc.perform(get("/blog/user/5")).andExpect(status().isNotFound());
+
+    }
 }
