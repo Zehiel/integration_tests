@@ -11,7 +11,7 @@ public interface DataFinder {
 
     List<UserData> findUsers(String searchString);
 
-    PostData getPost(Long userId);
+    PostData getPost(Long postId);
 
     List<PostData> getUserPosts(Long userId);
 

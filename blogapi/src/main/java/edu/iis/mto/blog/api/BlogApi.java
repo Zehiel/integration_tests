@@ -90,6 +90,14 @@ public class BlogApi {
         return posts;
     }
 
+    @ApiOperation(value = "Get post based on post id")
+    @RequestMapping(method = RequestMethod.GET, path = "/post/{postId}")
+    public PostData getPost(@PathVariable("postId") Long postId) {
+
+        logger.debug("get posts endpoint called for post id '{}'", postId);
+        return finder.getPost(postId);
+    }
+
     private Id id(Long userId) {
         return new Id(userId);
     }

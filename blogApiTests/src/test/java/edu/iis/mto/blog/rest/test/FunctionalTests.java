@@ -1,12 +1,15 @@
 package edu.iis.mto.blog.rest.test;
 
+import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.http.ContentType;
 import org.apache.http.HttpStatus;
 import org.json.JSONObject;
+import org.junit.Assert;
 import org.junit.BeforeClass;
-
-import com.jayway.restassured.RestAssured;
 import org.junit.Test;
+
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsEqual.equalTo;
 
 public class FunctionalTests {
 
@@ -49,7 +52,8 @@ public class FunctionalTests {
         JSONObject jsonObj = new JSONObject().put("firstName","Tom").put("lastName","Lister").put("email", "tom@domain.com");
         int userId = RestAssured.given().accept(ContentType.JSON).header("Content-Type", "application/json;charset=UTF-8")
                 .body(jsonObj.toString()).expect().log().all().statusCode(HttpStatus.SC_CREATED).when()
-                .post("/blog/user").path("id");
+                .post("/blog/user")
+                .path("id");
 
         JSONObject jsonObject = new JSONObject().put("entry","Test entry");
         RestAssured.given().accept(ContentType.JSON).header("Content-Type","application/json;charset=UTF-8")
@@ -57,7 +61,61 @@ public class FunctionalTests {
                 .post("/blog/user/"+userId+"/post");
     }
 
-    
+    @Test
+    public void confirmedUserShouldBeAbleToLikeOthersPosts() throws Exception {
+
+        JSONObject jsonObject = new JSONObject().put("entry","Test entry");
+        int postID = RestAssured.given().accept(ContentType.JSON).header("Content-Type","application/json;charset=UTF-8")
+                .body(jsonObject.toString()).expect().log().all().statusCode(HttpStatus.SC_CREATED).when()
+                .post("/blog/user/1/post")
+                .path("id");
 
 
+        RestAssured.given().accept(ContentType.JSON).header("Content-Type","application/json;charset=UTF-8")
+                .body(jsonObject.toString()).expect().log().all().statusCode(HttpStatus.SC_OK).when()
+                .post("/blog/user/2/like/"+postID);
+
+    }
+
+    @Test
+    public void confirmedUserShouldNotBeAbleToLikeOwnPost() throws Exception {
+
+        JSONObject jsonObject = new JSONObject().put("entry","Test entry");
+        int postID = RestAssured.given().accept(ContentType.JSON).header("Content-Type","application/json;charset=UTF-8")
+                .body(jsonObject.toString()).expect().log().all().statusCode(HttpStatus.SC_CREATED).when()
+                .post("/blog/user/1/post")
+                .path("id");
+
+
+        RestAssured.given().accept(ContentType.JSON).header("Content-Type","application/json;charset=UTF-8")
+                .body(jsonObject.toString()).expect().log().all().statusCode(HttpStatus.SC_BAD_REQUEST).when()
+                .post("/blog/user/1/like/"+postID);
+
+    }
+
+    @Test
+    public void likingPostSecondTimeShouldNotChangePostStatus() throws Exception {
+
+        JSONObject jsonObject = new JSONObject().put("entry","Test entry");
+        int postID = RestAssured.given().accept(ContentType.JSON).header("Content-Type","application/json;charset=UTF-8")
+                .body(jsonObject.toString()).expect().log().all().statusCode(HttpStatus.SC_CREATED).when()
+                .post("/blog/user/1/post")
+                .path("id");
+
+
+        RestAssured.given().accept(ContentType.JSON).header("Content-Type","application/json;charset=UTF-8")
+                .body(jsonObject.toString()).expect().log().all().statusCode(HttpStatus.SC_OK).when()
+                .post("/blog/user/2/like/"+postID);
+
+        RestAssured.given().accept(ContentType.JSON).header("Content-Type","application/json;charset=UTF-8")
+                .body(jsonObject.toString()).expect().log().all().statusCode(HttpStatus.SC_OK).when()
+                .post("/blog/user/2/like/"+postID);
+
+        int likesCount = RestAssured.given().accept(ContentType.JSON).header("Content-Type","application/json;charset=UTF-8")
+                .body(jsonObject.toString()).expect().log().all().statusCode(HttpStatus.SC_OK).when()
+                .get("/blog/post/"+postID)
+                .path("likesCount");
+
+                Assert.assertThat(likesCount, is(equalTo(1)));
+    }
 }
