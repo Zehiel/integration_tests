@@ -8,7 +8,7 @@ import org.junit.Test;
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.http.ContentType;
 
-public class CreateUserTest extends FunctionalTests {
+public class CreateUserTest {
 
     @Test
     @Ignore //Failing due to lack of implementation

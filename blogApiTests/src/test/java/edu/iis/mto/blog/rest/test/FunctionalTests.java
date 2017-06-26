@@ -67,13 +67,13 @@ public class FunctionalTests {
         JSONObject jsonObject = new JSONObject().put("entry","Test entry");
         int postID = RestAssured.given().accept(ContentType.JSON).header("Content-Type","application/json;charset=UTF-8")
                 .body(jsonObject.toString()).expect().log().all().statusCode(HttpStatus.SC_CREATED).when()
-                .post("/blog/user/1/post")
+                .post("/blog/user/0/post")
                 .path("id");
 
 
         RestAssured.given().accept(ContentType.JSON).header("Content-Type","application/json;charset=UTF-8")
                 .body(jsonObject.toString()).expect().log().all().statusCode(HttpStatus.SC_OK).when()
-                .post("/blog/user/2/like/"+postID);
+                .post("/blog/user/1/like/"+postID);
 
     }
 
@@ -83,13 +83,13 @@ public class FunctionalTests {
         JSONObject jsonObject = new JSONObject().put("entry","Test entry");
         int postID = RestAssured.given().accept(ContentType.JSON).header("Content-Type","application/json;charset=UTF-8")
                 .body(jsonObject.toString()).expect().log().all().statusCode(HttpStatus.SC_CREATED).when()
-                .post("/blog/user/1/post")
+                .post("/blog/user/0/post")
                 .path("id");
 
 
         RestAssured.given().accept(ContentType.JSON).header("Content-Type","application/json;charset=UTF-8")
                 .body(jsonObject.toString()).expect().log().all().statusCode(HttpStatus.SC_BAD_REQUEST).when()
-                .post("/blog/user/1/like/"+postID);
+                .post("/blog/user/0/like/"+postID);
 
     }
 
@@ -99,17 +99,17 @@ public class FunctionalTests {
         JSONObject jsonObject = new JSONObject().put("entry","Test entry");
         int postID = RestAssured.given().accept(ContentType.JSON).header("Content-Type","application/json;charset=UTF-8")
                 .body(jsonObject.toString()).expect().log().all().statusCode(HttpStatus.SC_CREATED).when()
-                .post("/blog/user/1/post")
+                .post("/blog/user/0/post")
                 .path("id");
 
 
         RestAssured.given().accept(ContentType.JSON).header("Content-Type","application/json;charset=UTF-8")
                 .body(jsonObject.toString()).expect().log().all().statusCode(HttpStatus.SC_OK).when()
-                .post("/blog/user/2/like/"+postID);
+                .post("/blog/user/1/like/"+postID);
 
         RestAssured.given().accept(ContentType.JSON).header("Content-Type","application/json;charset=UTF-8")
                 .body(jsonObject.toString()).expect().log().all().statusCode(HttpStatus.SC_OK).when()
-                .post("/blog/user/2/like/"+postID);
+                .post("/blog/user/1/like/"+postID);
 
         int likesCount = RestAssured.given().accept(ContentType.JSON).header("Content-Type","application/json;charset=UTF-8")
                 .body(jsonObject.toString()).expect().log().all().statusCode(HttpStatus.SC_OK).when()
