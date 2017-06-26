@@ -34,7 +34,7 @@ public class BlogApiTest {
     @MockBean
     private BlogService blogService;
 
-    @MockBean
+    @Autowired
     private BlogApi blogApi;
 
     @MockBean

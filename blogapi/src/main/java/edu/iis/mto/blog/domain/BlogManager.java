@@ -42,6 +42,9 @@ public class BlogManager extends DomainService implements BlogService {
     @Override
     public boolean addLikeToPost(Long userId, Long postId) {
         User user = userRepository.findOne(userId);
+        if(!user.getAccountStatus().equals(AccountStatus.CONFIRMED)) {
+          	throw new DomainError("User not confirmed!");
+        }
         BlogPost post = blogPostRepository.findOne(postId);
         if (post.getUser().getId().equals(userId)) {
             throw new DomainError("cannot like own post");
